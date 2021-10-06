@@ -16,16 +16,18 @@ export default function App() {
 
   useEffect(()=> {
     (async() => {
-      const reply = await Location.requestForegroundPermissionsAsync();
+      let {status} = await Location.requestForegroundPermissionsAsync();
       try {
-        if (reply.granted) {
-          const location = await Location.getLastKnownPositionAsync({accuracy: 6});
-          setLatitude(location.coords.latitude);
-          setLongitude(location.coords.longitude);
+        if (status !== 'granted') {
           setIsLoading(false);
-        } else {
-          setIsLoading(false);
+          alert("Geolocation failed.");
+          return;
         }
+
+        const location = await Location.getLastKnownPositionAsync({accuracy: Location.Accuracy.High});
+        setLatitude(location.coords.latitude);
+        setLongitude(location.coords.longitude);
+        setIsLoading(false);
       } catch (error) {
         alert(error);
         setIsLoading(false);
@@ -46,7 +48,6 @@ export default function App() {
             latitudeDelta: INITIAL_LATITUDE_DELTA,
             longitudeDelta: INITIAL_LONGITUDE_DELTA,
           }} 
-          mapType='satellite'
         >
           <Marker 
             title="testing"
